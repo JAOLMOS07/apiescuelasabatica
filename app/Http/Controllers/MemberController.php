@@ -4,9 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Member;
 use Illuminate\Http\Request;
+use JWTAuth;
 
 class MemberController extends Controller
 {
+    protected $user;
+    public function __construct(Request $request)
+    {
+        $token = $request->header('Authorization');
+        if ($token != '')
+            $this->user = JWTAuth::parseToken()->authenticate();
+    }
     /**
      * Display a listing of the resource.
      */
