@@ -15,8 +15,6 @@ return new class extends Migration {
             $table->date('date');
             $table->unsignedBigInteger('member_id');
             $table->unsignedBigInteger('register_type_id');
-            $table->unsignedBigInteger('class_id');
-            $table->foreign('class_id')->references('id')->on('school_classes');
             $table->foreign('member_id')->references('id')->on('members');
             $table->foreign('register_type_id')->references('id')->on('register_types');
             $table->boolean('value');

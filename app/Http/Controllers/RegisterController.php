@@ -28,15 +28,25 @@ class RegisterController extends Controller
      */
     public function store(Request $request)
     {
-        $register = Register::create([
-            "date" => $request->date,
-            "member_id" => $request->member_id,
-            "register_type_id" => $request->register_type_id,
-            "value" => $request->value,
-        ]);
-        return response($register);
-    }
+        $data = $request->all();
 
+        foreach ($data as $item) {
+            $member_id = $item['member_id'];
+            $date = $item['date'];
+            $registertypes = $item['registertypes'];
+
+            foreach ($registertypes as $register) {
+                Register::create([
+                    "date" => $date,
+                    "member_id" => $member_id,
+                    "register_type_id" => $register['registerTypeId'],
+                    "value" => $register['value'],
+                ]);
+            }
+        }
+
+        return response("OK");
+    }
     /**
      * Display the specified resource.
      */
