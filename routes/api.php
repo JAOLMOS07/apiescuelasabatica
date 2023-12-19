@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\RegisterController;
+
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -13,7 +17,16 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::prefix('v1')->group(function () {
+    Route::post('login', [AuthController::class, 'authenticate']);
+    Route::post('register', [AuthController::class, 'register']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    Route::group(['middleware' => ['jwt.verify']], function () {
+        Route::post('logout', [AuthController::class, 'logout']);
+        Route::post('get-user', [AuthController::class, 'getUser']);
+        Route::get('/getregistersDate', [RegisterController::class, 'getRegistersByDate']);
+
+
+    });
 });
+
