@@ -68,7 +68,13 @@ Sigue estos pasos para configurar el proyecto en tu máquina local:
     php artisan migrate
     ```
 
-8. Inicia el servidor de desarrollo:
+8. Ejecuta los seeders para crear los datos base:
+
+    ```bash
+    php artisan db:seed --class=DatabaseSeeder
+    ```
+
+9. Inicia el servidor de desarrollo:
 
     ```bash
     php artisan serve

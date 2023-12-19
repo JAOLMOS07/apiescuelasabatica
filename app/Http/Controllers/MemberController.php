@@ -20,7 +20,9 @@ class MemberController extends Controller
      */
     public function index()
     {
-        //
+        $class = $this->user->SchoolClass;
+        $members = Member::where('class_id', $class->id)->get();
+        return response($members);
     }
 
     /**
@@ -28,7 +30,17 @@ class MemberController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $class = $this->user->SchoolClass;
+        $member = Member::create([
+            'name' => $request->name,
+            'lastname' => $request->lastName,
+            'email' => "email@gmail.com",
+            'phone' => $request->phone,
+            'birthDay' => $request->birthDay,
+            'birthMonth' => $request->birthMonth,
+            'class_id' => $class->id
+        ]);
+        return response($member);
     }
 
     /**

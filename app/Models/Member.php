@@ -13,7 +13,8 @@ class Member extends Model
         'lastname',
         'email',
         'phone',
-        'birthdate',
+        'birthMonth',
+        'birthDay',
         'class_id'
     ];
     public function SchoolClass()

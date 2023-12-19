@@ -16,7 +16,8 @@ return new class extends Migration {
             $table->string('lastname', 30);
             $table->string('phone', 10);
             $table->string('email', 35);
-            $table->date('birthdate');
+            $table->unsignedInteger('birthDay');
+            $table->unsignedInteger('birthMonth');
             $table->unsignedBigInteger('class_id');
             $table->foreign('class_id')->references('id')->on('school_classes');
             $table->timestamps();

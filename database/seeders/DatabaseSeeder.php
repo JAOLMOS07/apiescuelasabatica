@@ -23,8 +23,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             classSeeder::class,
             RegisterTypeSeeder::class,
-            MemberSeeder::class,
-            RegisterSeeder::class
+
         ]);
     }
 }

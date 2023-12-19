@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\RegisterController;
 
 
@@ -24,9 +25,10 @@ Route::prefix('v1')->group(function () {
     Route::group(['middleware' => ['jwt.verify']], function () {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('get-user', [AuthController::class, 'getUser']);
-        Route::get('/getregistersDate', [RegisterController::class, 'getRegistersByDate']);
-
-
+        Route::get('/registersdate', [RegisterController::class, 'getRegistersByDate']);
+        Route::post('/registerinfo', [RegisterController::class, 'store']);
+        Route::post('/members/register', [MemberController::class, 'store']);
+        Route::get('/members', [MemberController::class, 'index']);
     });
 });
 
