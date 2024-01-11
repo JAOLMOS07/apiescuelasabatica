@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'name' => 'Maestro Clase 2',
-                'email' => 'maestro_clase2@gmail.com',
+                'email' => 'mmaestro_clase2@gmail.co',
             ],
             [
                 'name' => 'Maestro Clase 3',

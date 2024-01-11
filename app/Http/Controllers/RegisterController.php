@@ -2,96 +2,167 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\MemberDTO;
+use App\DTO\RegisterTypeDTO;
 use App\Models\Member;
 use App\Models\Register;
-use App\Models\SchoolClass;
+use App\Models\ResponseApi;
+use App\Models\RegisterType;
 use Illuminate\Http\Request;
-use JWTAuth;
+
 
 class RegisterController extends Controller
 {
     protected $user;
+
     public function __construct(Request $request)
     {
+        $this->middleware('auth:api', ['except' => []]);
         $token = $request->header('Authorization');
         if ($token != '')
-            $this->user = JWTAuth::parseToken()->authenticate();
+            $this->user = auth()->user();
     }
 
-    public function index()
-    {
 
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $data = $request->all();
 
         foreach ($data as $item) {
-            $member_id = $item['member_id'];
+            $member_id = $item['memberId'];
             $date = $item['date'];
-            $registertypes = $item['registertypes'];
+            $registertypes = $item['registerTypes'];
 
             foreach ($registertypes as $register) {
-                Register::create([
-                    "date" => $date,
-                    "member_id" => $member_id,
-                    "register_type_id" => $register['registerTypeId'],
-                    "value" => $register['value'],
-                ]);
+                if ($register['registerId'] === null) {
+
+                    $newId = $member_id . str_replace('-', '', $date) . $register['id'];
+                    Register::create([
+                        "id" => $newId,
+                        "date" => $date,
+                        "member_id" => $member_id,
+                        "register_type_id" => $register['id'],
+                        "value" => $register['value'],
+                    ]);
+                } else {
+                    $registerToUpdate = Register::FindOrFail($register['registerId']);
+                    $registerToUpdate->Update([
+                        "value" => $register['value'],
+                    ]);
+                }
             }
         }
 
-        return response("OK");
-    }
-    /**
-     * Display the specified resource.
-     */
-    public function show(Register $register)
-    {
-        return response($register);
+        /*  return response()->json([
+             "Datos guardados correctamente" => $request
+         ]); */
+
+        return $this->getRegistersByDate($data[0]['date']);
     }
 
-    public function getRegistersByDate(Request $request)
+    public function getRegistersByDate($date)
     {
         $class = $this->user->SchoolClass;
 
-        $members = Member::where('class_id', $class->id)->get();
-        $responseMembers = [];
+        $members = Member::with([
+            'registers' => function ($query) use ($date) {
+                $query->where('date', $date);
+            },
+            'registers.registerType'
+        ])
+            ->where('class_id', $class->id)
+            ->get();
 
-        foreach ($members as $member) {
-            $registers = Register::where('member_id', $member->id)
-                ->where('date', $request->date)
-                ->get();
+        $responseMembers = $members->map(function ($member) {
+            $registersTypes = $member->registers->map(function ($register) {
+                return new RegisterTypeDTO(
+                    $register->registerType->name,
+                    $register->registerType->id,
+                    $register->id,
+                    $register->value
+                );
+            });
 
-            $registersTypes = [];
+            if ($registersTypes->isEmpty()) {
+                $allRegistersTypes = RegisterType::all();
 
-            foreach ($registers as $register) {
-                $registersTypes[] = [
-                    'name' => $register->registerType->name,
-                    'value' => $register->value,
-                ];
+                $registersTypes = $allRegistersTypes->map(function ($registerType) {
+                    return new RegisterTypeDTO(
+                        $registerType->name,
+                        $registerType->id,
+                        null,
+                        0
+                    );
+                });
             }
 
-            $responseMembers[] = [
+            $memberDTO = new MemberDTO(
+                $member->id,
+                $member->name,
+                $member->lastName,
+                $member->email,
+                $member->phone,
+                $member->birthMonth,
+                $member->birthDay,
+                $member->status,
+                $member->class_id,
+                $member->address,
+                $registersTypes->toArray()
+            );
+        });
+
+        $response = new ResponseApi("members registers", $responseMembers);
+        return response()->json($response, 200);
+    }
+    public function getRegistersByDate2($date)
+    {
+        $class = $this->user->SchoolClass;
+
+        $members = Member::with([
+            'registers' => function ($query) use ($date) {
+                $query->where('date', $date);
+            },
+            'registers.registerType'
+        ])
+            ->where('class_id', $class->id)
+            ->get();
+
+        $responseMembers = $members->map(function ($member) {
+            $registersTypes = $member->registers->map(function ($register) {
+                return [
+                    'name' => $register->registerType->name,
+                    'id' => $register->registerType->id,
+                    'registerId' => $register->id,
+                    'value' => $register->value,
+                ];
+            })->toArray();
+
+            if (empty($registersTypes)) {
+                $allRegistersTypes = RegisterType::all();
+
+                $registersTypes = $allRegistersTypes->map(function ($registerType) {
+                    return [
+                        'name' => $registerType->name,
+                        'id' => $registerType->id,
+                        'registerId' => null,
+                        'value' => 0,
+                    ];
+                })->toArray();
+            }
+
+            return [
                 'id' => $member->id,
                 'name' => $member->name,
-                'lastName' => $member->lastname,
+                'lastName' => $member->lastName,
+                'status' => $member->status,
                 'registerTypes' => $registersTypes,
             ];
-        }
+        });
 
-        return response()->json(['members' => $responseMembers]);
+        $response = new ResponseApi("members registers", $responseMembers);
+        return response()->json($response, 200);
     }
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Register $register)
-    {
 
-    }
+
 
 }

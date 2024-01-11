@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('registers', function (Blueprint $table) {
-            $table->id();
+            $table->string('id')->unique();
             $table->date('date');
             $table->unsignedBigInteger('member_id');
             $table->unsignedBigInteger('register_type_id');

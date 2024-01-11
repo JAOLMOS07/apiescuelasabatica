@@ -10,12 +10,14 @@ class Member extends Model
     use HasFactory;
     protected $fillable = [
         'name',
-        'lastname',
+        'lastName',
         'email',
         'phone',
         'birthMonth',
         'birthDay',
-        'class_id'
+        'satus',
+        'class_id',
+        'address'
     ];
     public function SchoolClass()
     {

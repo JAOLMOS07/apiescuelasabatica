@@ -9,6 +9,7 @@ class Register extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'id',
         'date',
         'member_id',
         'register_type_id',
